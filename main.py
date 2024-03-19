@@ -21,19 +21,19 @@ class DataModel(BaseModel):
     humidity: float
 
 @app.get("/data/{dev_id}")
-async def get_data(val: int):
+async def get_data(dev_id: int):
     """Get paginated sensor data from data collection.
     Order the data from latest to oldest.
 
     Parameters
     ----------
-    val : int
-        _description_
+    dev_id : int
+        Id of the device whose data we need to get.
 
     Returns
     -------
-    _type_
-        _description_
+    list
+        array of datas
     """    
     data = {"fire": val}
     print(f"******{await db.list_collection_names()}")
@@ -41,6 +41,20 @@ async def get_data(val: int):
 
 @app.post("/update/{dev_id}")
 async def update_data(dev_id: int, data: DataModel):
+    """Add the sensor data of particular device to the collection.
+
+    Parameters
+    ----------
+    dev_id : int
+        Id of the device.
+    data : DataModel
+        sensor data
+
+    Returns
+    -------
+    dict
+        success or failure message
+    """    
     data_dict = data.model_dump()
     print(f'id: {dev_id} with data {data}')
     data_dict.update({"id": dev_id})
