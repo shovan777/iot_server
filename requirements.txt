@@ -1,0 +1,7 @@
+fastapi
+motor
+pydantic
+phonenumbers
+pydantic-extra-types
+python-jose[cryptography]
+passlib[bcrypt]
