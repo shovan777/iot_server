@@ -67,8 +67,8 @@ void setup() {
         delay(1000);
     }
 
-    // wifiMulti.addAP("shovanraj153", "shrestha@1995");
-    wifiMulti.addAP("POCO X3", "shovan12345");
+     wifiMulti.addAP("shovanraj153", "shrestha@1995");
+//    wifiMulti.addAP("POCO X3", "shovan12345");
 
     USE_SERIAL.printf("starting dht sensor");
     dht.begin();
@@ -122,12 +122,15 @@ float* measureDHT() {
 }
 
 void loop() {
-    float* dataArr = measureDHT();
+//    float* dataArr = measureDHT();
     // wait for WiFi connection
     // float dataArr[2];
     // dataArr[0] = 1.1;
     // dataArr[1] = 1.2;
     if((wifiMulti.run() == WL_CONNECTED)) {
+        float* dataArr = measureDHT();
+
+        delay(500);
 
         HTTPClient http;
 
@@ -137,12 +140,12 @@ void loop() {
         //uncomment below for get okkkkkk
         //http.begin("http://192.168.1.69:8000/data/11"); //HTTP
         //uncomment for post okkk
-        http.begin("http://192.168.238.169:8000/update/12");
+        http.begin("http://192.168.1.65:8000/update/12");
 
         http.addHeader("Content-Type", "application/json");
         
         // String httpRequestData = "{\"temp\":\"18\", \"humidity\":\"0.5\"}";
-        char *httpRequestDataC = (char*)malloc(25 * sizeof(char));
+        char *httpRequestDataC = (char*)malloc(40 * sizeof(char));
 
         sprintf(httpRequestDataC, "{\"temp\":\"%f\",\"humidity\":\"%f\"}", dataArr[0], dataArr[1]);
         String httpRequestData = httpRequestDataC;
