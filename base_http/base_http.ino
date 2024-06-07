@@ -17,6 +17,9 @@
 #define DHTPIN 4
 #define DHTTYPE DHT11
 
+DHT dht(DHTPIN, DHTTYPE);
+
+
 WiFiMulti wifiMulti;
 
 /*
@@ -64,7 +67,9 @@ void setup() {
         delay(1000);
     }
 
-    wifiMulti.addAP("shovanraj153", "shrestha@1995");
+    // wifiMulti.addAP("shovanraj153", "shrestha@1995");
+    wifiMulti.addAP("POCO X3", "shovan12345");
+
     USE_SERIAL.printf("starting dht sensor");
     dht.begin();
 
@@ -89,7 +94,9 @@ float* measureDHT() {
     // Check if any reads failed and exit early (to try again).
     if (isnan(h) || isnan(t) || isnan(f)) {
     Serial.println(F("Failed to read from DHT sensor!"));
-    return;
+    dataArr[0] = -1;
+    dataArr[0] = -1;
+    return dataArr;
     }
 
     // Compute heat index in Fahrenheit (the default)
@@ -117,6 +124,9 @@ float* measureDHT() {
 void loop() {
     float* dataArr = measureDHT();
     // wait for WiFi connection
+    // float dataArr[2];
+    // dataArr[0] = 1.1;
+    // dataArr[1] = 1.2;
     if((wifiMulti.run() == WL_CONNECTED)) {
 
         HTTPClient http;
@@ -127,15 +137,17 @@ void loop() {
         //uncomment below for get okkkkkk
         //http.begin("http://192.168.1.69:8000/data/11"); //HTTP
         //uncomment for post okkk
-        http.begin("http://192.168.1.69:8000/update/12");
+        http.begin("http://192.168.238.169:8000/update/12");
 
         http.addHeader("Content-Type", "application/json");
         
         // String httpRequestData = "{\"temp\":\"18\", \"humidity\":\"0.5\"}";
-        char *httpRequestData = (char*)malloc(25 * sizeof(char));
+        char *httpRequestDataC = (char*)malloc(25 * sizeof(char));
 
-        sprintf(httpRequestData, "{\"temp\":\"%f\",\"humidity\":\"%f\"}", p[0], p[1]);
+        sprintf(httpRequestDataC, "{\"temp\":\"%f\",\"humidity\":\"%f\"}", dataArr[0], dataArr[1]);
+        String httpRequestData = httpRequestDataC;
         
+        USE_SERIAL.printf("[HTTP] GET...\n %s", httpRequestData.c_str());
 
         USE_SERIAL.print("[HTTP] GET...\n");
         // start connection and send HTTP header
