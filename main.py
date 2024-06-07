@@ -108,7 +108,7 @@ async def get_current_active_user(
 # class DeviceModel(BaseModel):
 #     id: Optional[PyObjectId] = Field(alias="_id", default=None)
 class DataModel(BaseModel):
-    temp: int
+    temp: float
     humidity: float
 
 # class DataModelInDB(DataModel):
@@ -192,7 +192,7 @@ async def register_device(dev_id: int, phn: PhoneNumber):
 @app.post("/update/{dev_id}")
 async def update_data(
     dev_id: int, data: DataModel, 
-    current_user: Annotated[UserInDb, Depends(get_current_active_user)] # auth not needed
+    # current_user: Annotated[UserInDb, Depends(get_current_active_user)] # auth not needed
     ):
     """Add the sensor data of particular device to the collection.
 
@@ -209,15 +209,20 @@ async def update_data(
         success or failure message
     """
     data_dict = data.model_dump()
-    data_col = get_data_col(current_user)
+    user = {
+        "id": 1
+    }
+    # data_col = get_data_col(user)
+    data_col = db.get_collection("user_1")
     print(f"id: {dev_id} with data {data}")
     # may be check dev id belongs to device in future
     data_dict["dev_id"] = dev_id
     data_dict["time_stamp"] = datetime.now(timezone.utc)
     result = await data_col.insert_one(data_dict)
+    # print(result)
     if result:
-        return {"message": "failed"}
-    return {"message": "success"}
+        return {"message": "SUCCESSS"}
+    return {"message": "FAIL"}
 
 
 @app.post("/token")
