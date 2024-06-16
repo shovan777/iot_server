@@ -213,7 +213,7 @@ async def update_data(
         "id": 1
     }
     # data_col = get_data_col(user)
-    data_col = db.get_collection("user_1")
+    data_col = db.get_collection("user_9862021882")
     print(f"id: {dev_id} with data {data}")
     # may be check dev id belongs to device in future
     data_dict["dev_id"] = dev_id
