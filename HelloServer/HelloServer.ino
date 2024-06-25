@@ -1,36 +1,30 @@
 #include <WiFi.h>
-#include <WiFiClient.h>
-#include <WebServer.h>
+//#include <WiFiClient.h>
+//#include <WebServer.h>
 #include <ESPmDNS.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 
 const char* ssid = "POCO X3";
 const char* password = "shovan12345";
 
-WebServer server(80);
+const char* PARAM_INPUT_1 = "ssid";
+const char* PARAM_INPUT_2 = "password";
+
+
+//WebServer server(80);
+AsyncWebServer server(80);
+
 
 const int led = 13;
 
-void handleRoot() {
-  digitalWrite(led, 1);
-  server.send(200, "text/html", "<form action=\"/wificred\"><label for=\"ssid\">SSID:</label><input type=\"text\" id=\"ssid\" name=\"ssid\"><br><label for=\"password\">PASSWORD:</label><input type=\"text\" id=\"password\" name=\"password\"><br> <input type=\"submit\" value=\"Submit\"></form>");
-  digitalWrite(led, 0);
+void handleRoot(AsyncWebServerRequest *request) {
+//  server.send(200, "text/html", "<form action=\"/wificred\"><label for=\"ssid\">SSID:</label><input type=\"text\" id=\"ssid\" name=\"ssid\"><br><label for=\"password\">PASSWORD:</label><input type=\"text\" id=\"password\" name=\"password\"><br> <input type=\"submit\" value=\"Submit\"></form>");
+  request->send_P(200, "text/html", "<form action=\"/wificred\"><label for=\"ssid\">SSID:</label><input type=\"text\" id=\"ssid\" name=\"ssid\"><br><label for=\"password\">PASSWORD:</label><input type=\"text\" id=\"password\" name=\"password\"><br> <input type=\"submit\" value=\"Submit\"></form>");
 }
 
-void handleNotFound() {
-  digitalWrite(led, 1);
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
-  for (uint8_t i = 0; i < server.args(); i++) {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
-  }
-  server.send(404, "text/plain", message);
-  digitalWrite(led, 0);
+void handleNotFound(AsyncWebServerRequest *request) {
+  request->send(404, "text/plain", "Not found");
 }
 
 void setup(void) {
@@ -56,13 +50,28 @@ void setup(void) {
     Serial.println("MDNS responder started");
   }
 
-  server.on("/", handleRoot);
+  server.on("/", HTTP_GET, handleRoot);
 
-  server.on("/hello", []() {
-    server.send(200, "text/plain", "Hi!!! ur friendly esp here!!");
+  server.on("/hello", HTTP_GET, [](AsyncWebServerRequest *request) {
+//    server.send(200, "text/plain", "Hi!!! ur friendly esp here!!");
+    request->send_P(200, "text/plain", "Hi!!! ur friendly esp here!!");
   });
 
-//  server.on("/
+  server.on("/wificred", HTTP_GET, [](AsyncWebServerRequest *request) {
+    String inputSSID;
+    String inputPswd;
+    if (request->hasParam(PARAM_INPUT_1)) {
+      inputSSID = request->getParam(PARAM_INPUT_1)->value();
+    }
+    if (request->hasParam(PARAM_INPUT_2)) {
+      inputPswd = request->getParam(PARAM_INPUT_2)->value();
+    }
+  Serial.println(inputSSID);
+  Serial.println(inputPswd);
+    
+    request->send(200, "text/html", "you provided following data <br> SSID: "+inputSSID+"<br>Password: " + inputPswd);
+  });
+
 
   server.onNotFound(handleNotFound);
 
@@ -71,6 +80,6 @@ void setup(void) {
 }
 
 void loop(void) {
-  server.handleClient();
-  delay(2);//allow the cpu to switch to other tasks
+//  server.handleClient();
+//  delay(2);//allow the cpu to switch to other tasks
 }
